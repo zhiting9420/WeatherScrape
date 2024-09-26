@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气数据仪表板</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.2.0/dist/chartjs-plugin-crosshair.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script>
+        // 在这里注入数据
+        var chartData = {
+            dates: {{ dates|safe }},
+            maxTemperatures: {{ max_temperatures|safe }},
+            minTemperatures: {{ min_temperatures|safe }},
+            weatherTypes: {{ weather_types|safe }},
+            weatherCounts: {{ weather_counts|safe }}
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>天气数据仪表板</h1>
+            <form action="{% url 'weather_dashboard' %}" method="get">
+                <label for="month">选择月份:</label>
+                <select name="month" id="month" onchange="this.form.submit()">
+                    {% for i in "xxxxxxxxxxxx" %}
+                        <option value="{{ forloop.counter }}" {% if forloop.counter == selected_month %}selected{% endif %}>
+                            {{ forloop.counter|stringformat:"02d" }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-value">{{ avg_max_temp|floatformat:1 }}°C</div>
+                <div>平均最高气温</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ avg_min_temp|floatformat:1 }}°C</div>
+                <div>平均最低气温</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ max_temperature }}°C</div>
+                <div>最高气温</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ min_temperature }}°C</div>
+                <div>最低气温</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="temperatureChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="weatherChart"></canvas>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>星期</th>
+                        <th>最高气温(°C)</th>
+                        <th>最低气温(°C)</th>
+                        <th>天气</th>
+                        <th>风向</th>
+                        <th>级别</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in weather_data %}
+                    <tr>
+                        <td>{{ data.date|date:"Y-m-d" }}</td>
+                        <td>{{ data.date|date:"l" }}</td>
+                        <td class="max-temp">{{ data.max_temperature }}</td>
+                        <td class="min-temp">{{ data.min_temperature }}</td>
+                        <td>{{ data.weather }}</td>
+                        <td>{{ data.wind_direction }}</td>
+                        <td class="wind-level">{{ data.wind_level }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+
+</body>
+</html>
